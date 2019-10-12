@@ -75,7 +75,7 @@
         <dependency>
             <groupId>com.tomoncle</groupId>
             <artifactId>spring-boot-config-errors</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.5.12</version>
         </dependency>
     </dependencies>
 
