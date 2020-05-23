@@ -24,19 +24,14 @@ SOFTWARE.
 
 package com.tomoncle.dubbo.samples.provider.config;
 
-import com.alibaba.dubbo.common.URL;
 import com.alibaba.dubbo.config.ApplicationConfig;
 import com.alibaba.dubbo.config.ProtocolConfig;
 import com.alibaba.dubbo.config.RegistryConfig;
-import com.alibaba.dubbo.rpc.Exporter;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.Protocol;
-import com.alibaba.dubbo.rpc.RpcException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * dubbo 注解配置 com.alibaba.dubbo.config.spring.context.annotation.DubboConfigConfiguration
+ * dubbo 注解配置
  * Created by liyuanjun on 18-9-7.
  */
 @Configuration
@@ -45,6 +40,7 @@ public class DubboConfiguration {
     public ApplicationConfig applicationConfig() {
         ApplicationConfig applicationConfig = new ApplicationConfig();
         applicationConfig.setName("provider-test");
+        applicationConfig.setRegistry(registryConfig());
         return applicationConfig;
     }
 
@@ -59,9 +55,7 @@ public class DubboConfiguration {
     @Bean
     public ProtocolConfig protocolConfig(){
         ProtocolConfig protocolConfig=new ProtocolConfig();
-        protocolConfig.setPort(-1); // 注册随机端口
+        protocolConfig.setPort(-1);// 注册随机端口
         return protocolConfig;
     }
-
-
 }

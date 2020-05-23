@@ -22,29 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package com.tomoncle.dubbo.samples.provider.impl;
+package com.tomoncle.dubbo.samples.provider;
 
-import com.alibaba.dubbo.config.annotation.Service;
-import com.tomoncle.dubbo.samples.api.service.StudentService;
-import com.tomoncle.dubbo.samples.model.Student;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * 使用com.alibaba.dubbo.config.annotation.Service注解注册dubbo服务
+ * 服务提供方入口程序
  * Created by liyuanjun on 18-9-7.
  */
-
-@Service(timeout = 5000)
-public class StudentServiceImpl implements StudentService {
-    @Override
-    public List<Student> students() {
-        return new ArrayList<Student>() {{
-            Student s = new Student();
-            s.setName(System.getProperty("username"));
-            s.setAge(Integer.valueOf(System.getProperty("age")));
-            add(s);
-        }};
+@SpringBootApplication(scanBasePackages = {"com.tomoncle.dubbo.samples.provider"})
+@DubboComponentScan(basePackages = "com.tomoncle.dubbo.samples.provider.impl")
+public class Provider2Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Provider2Application.class, args);
     }
 }

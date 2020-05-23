@@ -32,13 +32,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 服务消费者
  * Created by liyuanjun on 18-9-7.
  */
-@SpringBootApplication(scanBasePackages = {
-        "com.tomoncle.dubbo.samples.consumer",
-        "com.tomoncle.config.springboot"
-})
-@DubboComponentScan(basePackages = {
-        "com.tomoncle.dubbo.samples.consumer.controller"
-})
+@SpringBootApplication(scanBasePackages = {"com.tomoncle.dubbo.samples.consumer"})
+@DubboComponentScan(basePackages = {"com.tomoncle.dubbo.samples.consumer.controller"})
 public class ConsumerApplication {
     public static void main(String[] args) {
         SpringApplication.run(ConsumerApplication.class, args);

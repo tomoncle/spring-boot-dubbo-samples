@@ -43,7 +43,7 @@ public class StudentController {
     /**
      * com.alibaba.dubbo.config.annotation.Reference注解引用服务
      */
-    @Reference
+    @Reference(loadbalance = "roundrobin")
     private StudentService studentService;
 
     @RequestMapping
