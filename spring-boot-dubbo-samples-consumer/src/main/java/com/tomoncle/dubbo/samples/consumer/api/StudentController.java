@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package com.tomoncle.dubbo.samples.consumer.controller;
+package com.tomoncle.dubbo.samples.consumer.api;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.tomoncle.dubbo.samples.api.service.StudentService;
