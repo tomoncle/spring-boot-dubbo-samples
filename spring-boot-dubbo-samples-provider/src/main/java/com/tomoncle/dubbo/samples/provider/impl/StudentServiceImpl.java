@@ -27,7 +27,6 @@ package com.tomoncle.dubbo.samples.provider.impl;
 import com.tomoncle.dubbo.samples.api.service.StudentService;
 import com.tomoncle.dubbo.samples.model.Student;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.apache.dubbo.config.annotation.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,4 +47,11 @@ public class StudentServiceImpl implements StudentService {
             add(s);
         }};
     }
+
+    @Override
+    public Student save(Student student) {
+        System.out.println(student);
+        return student;
+    }
+
 }

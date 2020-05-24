@@ -48,4 +48,10 @@ public class StudentServiceImpl implements StudentService {
             add(s);
         }};
     }
+
+    @Override
+    public Student save(Student student) {
+        System.out.println(student);
+        return student;
+    }
 }

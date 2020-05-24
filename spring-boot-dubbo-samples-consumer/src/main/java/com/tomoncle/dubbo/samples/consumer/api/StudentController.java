@@ -27,13 +27,11 @@ package com.tomoncle.dubbo.samples.consumer.api;
 import com.tomoncle.dubbo.samples.api.service.StudentService;
 import com.tomoncle.dubbo.samples.model.Student;
 import org.apache.dubbo.config.annotation.DubboReference;
-import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * web api
@@ -44,6 +42,8 @@ import java.util.List;
 @RequestMapping("/students")
 public class StudentController {
 
+    private static boolean isOk = false;
+    private static volatile int number = 0;
     /**
      * com.alibaba.dubbo.config.annotation.Reference注解引用服务
      */
@@ -73,6 +73,47 @@ public class StudentController {
             }};
         }
         return students;
+    }
+
+
+    @GetMapping("/save")
+    public Student save() {
+        Student student = new Student();
+        Set<String> set = Collections.synchronizedSet(new HashSet<>());
+        int size = 100;
+        for (int i = 0; i < size; i++) {
+            new Thread(() -> {
+                while (true) {
+                    if (isOk) {
+                        try {
+                            for (int j = 0; j < 100; j++) {
+                                synchronized (StudentController.class) {
+                                    number++;
+                                }
+                                student.setAge(number);
+                                studentService.save(student);
+                            }
+                        } catch (RuntimeException e) {
+                            e.printStackTrace();
+                        } finally {
+                            set.add(Thread.currentThread().getName());
+                        }
+                        break;
+                    }
+                }
+            }).start();
+        }
+        isOk = true;
+        while (set.size() < size) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(number);
+        }
+        System.out.println(set.size());
+        return student;
     }
 
 }
