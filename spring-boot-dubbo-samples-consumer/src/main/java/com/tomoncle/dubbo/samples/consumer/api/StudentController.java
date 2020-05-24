@@ -24,12 +24,15 @@ SOFTWARE.
 
 package com.tomoncle.dubbo.samples.consumer.api;
 
-import com.alibaba.dubbo.config.annotation.Reference;
 import com.tomoncle.dubbo.samples.api.service.StudentService;
 import com.tomoncle.dubbo.samples.model.Student;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,18 +40,39 @@ import java.util.List;
  * <p/>
  * Created by liyuanjun on 18-9-7.
  */
-@RestController("/students")
+@RestController
+@RequestMapping("/students")
 public class StudentController {
 
     /**
      * com.alibaba.dubbo.config.annotation.Reference注解引用服务
      */
-    @Reference(loadbalance = "roundrobin")
+    @DubboReference(loadbalance = "roundrobin")
     private StudentService studentService;
 
-    @RequestMapping
+    @GetMapping("/list")
     public List<Student> getStudents() {
+        List<Student> students = null;
+        for (int i = 0; i < 10000; i++) {
+            students = studentService.students();
+        }
+        return students;
+    }
+
+    @GetMapping("/get")
+    public List<Student> get() {
         return studentService.students();
+    }
+
+    @GetMapping("/none")
+    public List<Student> none() {
+        List<Student> students = null;
+        for (int i = 0; i < 10000; i++) {
+            students = new ArrayList() {{
+                add(new Student());
+            }};
+        }
+        return students;
     }
 
 }

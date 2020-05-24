@@ -24,7 +24,7 @@ SOFTWARE.
 
 package com.tomoncle.dubbo.samples.provider;
 
-import com.alibaba.dubbo.config.spring.context.annotation.DubboComponentScan;
+import org.apache.dubbo.config.spring.context.annotation.EnableDubbo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -33,7 +33,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Created by liyuanjun on 18-9-7.
  */
 @SpringBootApplication(scanBasePackages = {"com.tomoncle.dubbo.samples.provider"})
-@DubboComponentScan(basePackages = "com.tomoncle.dubbo.samples.provider.impl")
+@EnableDubbo
 public class Provider2Application {
     public static void main(String[] args) {
         SpringApplication.run(Provider2Application.class, args);

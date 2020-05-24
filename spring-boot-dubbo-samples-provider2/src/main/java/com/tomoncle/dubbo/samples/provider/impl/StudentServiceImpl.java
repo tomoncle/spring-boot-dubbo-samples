@@ -24,9 +24,10 @@ SOFTWARE.
 
 package com.tomoncle.dubbo.samples.provider.impl;
 
-import com.alibaba.dubbo.config.annotation.Service;
 import com.tomoncle.dubbo.samples.api.service.StudentService;
 import com.tomoncle.dubbo.samples.model.Student;
+import org.apache.dubbo.config.annotation.DubboService;
+import org.apache.dubbo.config.annotation.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.List;
  * Created by liyuanjun on 18-9-7.
  */
 
-@Service(timeout = 5000)
+@DubboService(timeout = 5000)
 public class StudentServiceImpl implements StudentService {
     @Override
     public List<Student> students() {
