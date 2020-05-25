@@ -26,6 +26,7 @@ package com.tomoncle.dubbo.samples.consumer.api;
 
 import com.tomoncle.dubbo.samples.api.service.StudentService;
 import com.tomoncle.dubbo.samples.model.Student;
+import lombok.SneakyThrows;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,55 +43,53 @@ import java.util.*;
 @RequestMapping("/students")
 public class StudentController {
 
-    private static boolean isOk = false;
-    private static volatile int number = 0;
+    private boolean isOk = false;
+    private volatile int number = 0;
     /**
      * com.alibaba.dubbo.config.annotation.Reference注解引用服务
      */
     @DubboReference(loadbalance = "roundrobin")
     private StudentService studentService;
 
+    private int getNumber() {
+        synchronized (StudentController.class) {
+            number++;
+        }
+        return number;
+    }
+
     @GetMapping("/list")
     public List<Student> getStudents() {
-        List<Student> students = null;
-        for (int i = 0; i < 10000; i++) {
-            students = studentService.students();
-        }
-        return students;
+        return studentService.students();
     }
 
     @GetMapping("/get")
-    public List<Student> get() {
-        return studentService.students();
+    public Student get() {
+        return studentService.save(new Student());
     }
 
     @GetMapping("/none")
     public List<Student> none() {
-        List<Student> students = null;
-        for (int i = 0; i < 10000; i++) {
-            students = new ArrayList() {{
-                add(new Student());
-            }};
-        }
-        return students;
+        return new ArrayList<Student>() {{
+            add(new Student());
+        }};
     }
 
-
-    @GetMapping("/save")
-    public Student save() {
-        Student student = new Student();
+    @SneakyThrows
+    @GetMapping("/batch")
+    public long batch() {
         Set<String> set = Collections.synchronizedSet(new HashSet<>());
         int size = 100;
+        long start = System.currentTimeMillis();
         for (int i = 0; i < size; i++) {
             new Thread(() -> {
                 while (true) {
                     if (isOk) {
                         try {
+                            Student student;
                             for (int j = 0; j < 100; j++) {
-                                synchronized (StudentController.class) {
-                                    number++;
-                                }
-                                student.setAge(number);
+                                student = new Student();
+                                student.setAge(j);
                                 studentService.save(student);
                             }
                         } catch (RuntimeException e) {
@@ -105,15 +104,10 @@ public class StudentController {
         }
         isOk = true;
         while (set.size() < size) {
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println(number);
+            Thread.sleep(1);
         }
-        System.out.println(set.size());
-        return student;
+        number = 0;
+        return System.currentTimeMillis() - start;
     }
 
 }
