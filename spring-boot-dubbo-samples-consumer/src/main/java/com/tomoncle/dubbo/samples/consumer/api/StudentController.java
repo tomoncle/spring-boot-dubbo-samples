@@ -30,6 +30,7 @@ import lombok.SneakyThrows;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -64,8 +65,8 @@ public class StudentController {
     }
 
     @GetMapping("/get")
-    public Student get() {
-        return studentService.save(new Student());
+    public int get() {
+        return studentService.students().get(0).getAge();
     }
 
     @GetMapping("/none")
@@ -77,21 +78,19 @@ public class StudentController {
 
     @SneakyThrows
     @GetMapping("/batch")
-    public long batch() {
+    public long batch(@RequestParam(defaultValue = "100") int size) {
         Set<String> set = Collections.synchronizedSet(new HashSet<>());
-        int size = 100;
+//        int size = 1000;
+        Student student = new Student();
         long start = System.currentTimeMillis();
         for (int i = 0; i < size; i++) {
+            int finalI = i;
             new Thread(() -> {
                 while (true) {
                     if (isOk) {
                         try {
-                            Student student;
-                            for (int j = 0; j < 100; j++) {
-                                student = new Student();
-                                student.setAge(j);
-                                studentService.save(student);
-                            }
+                            student.setAge(finalI);
+                            studentService.save(student);
                         } catch (RuntimeException e) {
                             e.printStackTrace();
                         } finally {
@@ -104,7 +103,7 @@ public class StudentController {
         }
         isOk = true;
         while (set.size() < size) {
-            Thread.sleep(1);
+            Thread.sleep(50);
         }
         number = 0;
         return System.currentTimeMillis() - start;
