@@ -32,8 +32,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 服务消费者
  * Created by liyuanjun on 18-9-7.
  */
-@SpringBootApplication(scanBasePackages = {"com.tomoncle.dubbo.samples.consumer"})
+
 @EnableDubbo
+@SpringBootApplication
 public class ConsumerApplication {
     public static void main(String[] args) {
         SpringApplication.run(ConsumerApplication.class, args);

@@ -28,12 +28,16 @@ import com.tomoncle.dubbo.samples.api.service.StudentService;
 import com.tomoncle.dubbo.samples.model.Student;
 import lombok.SneakyThrows;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * web api
@@ -43,21 +47,21 @@ import java.util.*;
 @RestController
 @RequestMapping("/students")
 public class StudentController {
-
-    private boolean isOk = false;
-    private volatile int number = 0;
+    private static Logger logger = LogManager.getLogger(StudentController.class);
+    private volatile boolean enable = false;
+    private AtomicInteger atomicSize = new AtomicInteger(0);
     /**
-     * com.alibaba.dubbo.config.annotation.Reference注解引用服务
+     * @see com.alibaba.dubbo.config.annotation.Reference 注解引用服务
+     * Load balance strategy, legal values include: random, roundrobin, leastactive
+     *
+     * @see org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance #doSelect
+     * @see org.apache.dubbo.rpc.cluster.loadbalance.AbstractLoadBalance #getWeight
+     * roundrobin：权重，默认1:1, 服务提供者A下线后，未下线的服务B权重会升高, 服务A再次上线后，权重变小
+     *             计算方式为服务在线时间
+     *
      */
-    @DubboReference(loadbalance = "roundrobin")
+    @DubboReference(loadbalance = RoundRobinLoadBalance.NAME)
     private StudentService studentService;
-
-    private int getNumber() {
-        synchronized (StudentController.class) {
-            number++;
-        }
-        return number;
-    }
 
     @GetMapping("/list")
     public List<Student> getStudents() {
@@ -65,8 +69,13 @@ public class StudentController {
     }
 
     @GetMapping("/get")
-    public int get() {
-        return studentService.students().get(0).getAge();
+    public Student get() {
+        List<Student> students = studentService.students();
+        if (students.size() > 0) {
+            return studentService.students().get(0);
+        } else {
+            return null;
+        }
     }
 
     @GetMapping("/none")
@@ -79,34 +88,38 @@ public class StudentController {
     @SneakyThrows
     @GetMapping("/batch")
     public long batch(@RequestParam(defaultValue = "100") int size) {
-        Set<String> set = Collections.synchronizedSet(new HashSet<>());
-//        int size = 1000;
-        Student student = new Student();
         long start = System.currentTimeMillis();
         for (int i = 0; i < size; i++) {
-            int finalI = i;
-            new Thread(() -> {
-                while (true) {
-                    if (isOk) {
-                        try {
-                            student.setAge(finalI);
-                            studentService.save(student);
-                        } catch (RuntimeException e) {
-                            e.printStackTrace();
-                        } finally {
-                            set.add(Thread.currentThread().getName());
-                        }
-                        break;
-                    }
-                }
-            }).start();
+            new Thread(new InnerTask(i)).start();
         }
-        isOk = true;
-        while (set.size() < size) {
-            Thread.sleep(50);
+        enable = true;
+        while (atomicSize.get() < size) {
+            Thread.sleep(1);
         }
-        number = 0;
         return System.currentTimeMillis() - start;
     }
 
+
+    class InnerTask implements Runnable{
+        private int age;
+        InnerTask(int age) {
+            this.age = age;
+        }
+        @Override
+        public void run() {
+            while (true) {
+                if (enable) {
+                    try {
+                        studentService.save(new Student().setAge(age).setName(Thread.currentThread().getName()));
+                    } catch (RuntimeException e) {
+                        e.printStackTrace();
+                    } finally {
+                        atomicSize.getAndIncrement();
+                        logger.info("age: "+age+" ; thread name : "+Thread.currentThread().getName());
+                    }
+                    break;
+                }
+            }
+        }
+    }
 }

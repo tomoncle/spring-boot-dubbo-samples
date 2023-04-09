@@ -32,7 +32,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * 服务提供方入口程序
  * Created by liyuanjun on 18-9-7.
  */
-@SpringBootApplication(scanBasePackages = {"com.tomoncle.dubbo.samples.provider"})
+@SpringBootApplication
 @EnableDubbo
 public class Provider2Application {
     public static void main(String[] args) {

@@ -27,6 +27,8 @@ package com.tomoncle.dubbo.samples.provider.impl;
 import com.tomoncle.dubbo.samples.api.service.StudentService;
 import com.tomoncle.dubbo.samples.model.Student;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +40,11 @@ import java.util.List;
 
 @DubboService(timeout = 5000)
 public class StudentServiceImpl implements StudentService {
+    private static Logger logger = LogManager.getLogger(StudentServiceImpl.class);
+
     @Override
     public List<Student> students() {
+        logger.info("callable students");
         return new ArrayList<Student>() {{
             Student s = new Student();
             s.setName(System.getProperty("username"));
@@ -50,7 +55,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student save(Student student) {
-        System.out.println(student);
+        logger.info(student);
         return student;
     }
 
